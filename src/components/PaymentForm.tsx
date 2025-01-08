@@ -30,6 +30,15 @@ const formSchema = z.object({
   accountNumber: z.string().optional(),
 });
 
+const formatCardNumber = (value: string) => {
+  // Remove any non-digit characters
+  const digits = value.replace(/\D/g, "");
+  
+  // Split into groups of 4 and join with spaces, but don't add space after last group
+  const groups = digits.match(/.{1,4}/g) || [];
+  return groups.join(" ").substr(0, 19); // 16 digits + 3 spaces = 19 characters
+};
+
 export function PaymentForm() {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -83,7 +92,15 @@ export function PaymentForm() {
                 <FormItem>
                   <FormLabel>Card Number</FormLabel>
                   <FormControl>
-                    <Input placeholder="1234 5678 9012 3456" {...field} />
+                    <Input 
+                      placeholder="1234 5678 9012 3456" 
+                      {...field}
+                      onChange={(e) => {
+                        const formatted = formatCardNumber(e.target.value);
+                        field.onChange(formatted);
+                      }}
+                      maxLength={19}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
