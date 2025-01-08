@@ -10,7 +10,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -19,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { CreditCardForm } from "./CreditCardForm";
+import { BankAccountForm } from "./BankAccountForm";
 
 const formSchema = z.object({
   paymentMethod: z.enum(["credit-card", "bank-account"]),
@@ -29,15 +30,6 @@ const formSchema = z.object({
   bsb: z.string().optional(),
   accountNumber: z.string().optional(),
 });
-
-const formatCardNumber = (value: string) => {
-  // Remove any non-digit characters
-  const digits = value.replace(/\D/g, "");
-  
-  // Split into groups of 4 and join with spaces, but don't add space after last group
-  const groups = digits.match(/.{1,4}/g) || [];
-  return groups.join(" ").substr(0, 19); // 16 digits + 3 spaces = 19 characters
-};
 
 export function PaymentForm() {
   const { toast } = useToast();
@@ -83,103 +75,8 @@ export function PaymentForm() {
           )}
         />
 
-        {paymentMethod === "credit-card" && (
-          <>
-            <FormField
-              control={form.control}
-              name="cardNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Card Number</FormLabel>
-                  <FormControl>
-                    <Input 
-                      placeholder="1234 5678 9012 3456" 
-                      {...field}
-                      onChange={(e) => {
-                        const formatted = formatCardNumber(e.target.value);
-                        field.onChange(formatted);
-                      }}
-                      maxLength={19}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="expiryDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Expiry Date</FormLabel>
-                    <FormControl>
-                      <Input placeholder="MM/YY" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="cvv"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CVV</FormLabel>
-                    <FormControl>
-                      <Input placeholder="123" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </>
-        )}
-
-        {paymentMethod === "bank-account" && (
-          <>
-            <FormField
-              control={form.control}
-              name="accountName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="John Doe" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="bsb"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>BSB</FormLabel>
-                  <FormControl>
-                    <Input placeholder="123-456" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="accountNumber"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Account Number</FormLabel>
-                  <FormControl>
-                    <Input placeholder="12345678" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </>
-        )}
+        {paymentMethod === "credit-card" && <CreditCardForm control={form.control} />}
+        {paymentMethod === "bank-account" && <BankAccountForm control={form.control} />}
 
         <Button type="submit" className="w-full">Submit Payment Details</Button>
       </form>
