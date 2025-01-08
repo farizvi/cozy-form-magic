@@ -23,12 +23,72 @@ import { BankAccountForm } from "./BankAccountForm";
 
 const formSchema = z.object({
   paymentMethod: z.enum(["credit-card", "bank-account"]),
-  cardNumber: z.string().optional(),
-  expiryDate: z.string().optional(),
-  cvv: z.string().optional(),
-  accountName: z.string().optional(),
-  bsb: z.string().optional(),
-  accountNumber: z.string().optional(),
+  cardNumber: z.string()
+    .regex(/^(\d{4} ){3}\d{4}$/, "Card number must be in format 'XXXX XXXX XXXX XXXX'")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "credit-card" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Card number is required for credit card payments",
+        });
+      }
+    }),
+  expiryDate: z.string()
+    .regex(/^(0[1-9]|1[0-2])\/([0-9]{2})$/, "Expiry date must be in MM/YY format")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "credit-card" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Expiry date is required for credit card payments",
+        });
+      }
+    }),
+  cvv: z.string()
+    .regex(/^\d{3}$/, "CVV must be exactly 3 digits")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "credit-card" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "CVV is required for credit card payments",
+        });
+      }
+    }),
+  accountName: z.string()
+    .min(1, "Account name is required")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "bank-account" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Account name is required for bank account payments",
+        });
+      }
+    }),
+  bsb: z.string()
+    .regex(/^\d{3}-\d{3}$/, "BSB must be in format 'XXX-XXX'")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "bank-account" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "BSB is required for bank account payments",
+        });
+      }
+    }),
+  accountNumber: z.string()
+    .regex(/^\d{6,10}$/, "Account number must be between 6 and 10 digits")
+    .optional()
+    .superRefine((val, ctx) => {
+      if (ctx.parent.paymentMethod === "bank-account" && !val) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Account number is required for bank account payments",
+        });
+      }
+    }),
 });
 
 export function PaymentForm() {
