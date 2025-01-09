@@ -1,7 +1,7 @@
 import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "./ui/form";
 import { Input } from "./ui/input";
 import { Control } from "react-hook-form";
-import { formatCardNumber } from "@/utils/formatters";
+import { formatCardNumber, formatExpiryDate } from "@/utils/formatters";
 
 interface CreditCardFormProps {
   control: Control<any>;
@@ -39,7 +39,15 @@ export function CreditCardForm({ control }: CreditCardFormProps) {
             <FormItem>
               <FormLabel>Expiry Date</FormLabel>
               <FormControl>
-                <Input placeholder="MM/YY" {...field} />
+                <Input 
+                  placeholder="MM/YY" 
+                  {...field}
+                  onChange={(e) => {
+                    const formatted = formatExpiryDate(e.target.value);
+                    field.onChange(formatted);
+                  }}
+                  maxLength={5}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -52,7 +60,7 @@ export function CreditCardForm({ control }: CreditCardFormProps) {
             <FormItem>
               <FormLabel>CVV</FormLabel>
               <FormControl>
-                <Input placeholder="123" {...field} />
+                <Input placeholder="123" {...field} maxLength={3} />
               </FormControl>
               <FormMessage />
             </FormItem>
